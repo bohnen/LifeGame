@@ -105,16 +105,17 @@ class Matrix {
 	}
 
 }
+var rd = 5; // initial radius
 def matrix = Matrix {}
 def circles = Group {
-			translateX:5
-			translateY:5
+			translateX: 5
+			translateY: 5
 			content: for (i in [0..<MATRIX_SIZE]) {
 				for (j in [0..<MATRIX_SIZE]) {
 					Circle {
 						translateX: (i + 1) * 10
 						translateY: (j + 1) * 10
-						radius: 5
+						radius: bind if(matrix.rows[i].columns[j]) rd else 5
 						fill: bind if (matrix.rows[i].columns[j]) Color.RED else Color.WHITE
 
 						onMouseClicked: function(e: MouseEvent): Void {
@@ -135,6 +136,20 @@ def clock = Timeline {
 				}
 			]
 		};
+// heatbeat animation
+
+Timeline {
+	repeatCount: Timeline.INDEFINITE
+	rate: 0.25
+	keyFrames: [
+		at (0.0s) {rd => 5},
+		at (0.25s) {rd => 2},
+		at (0.5s) {rd => 4},
+		at (0.75s) {rd => 2}
+		at (1.0s) {rd => 5},
+	]
+}.play();
+
 // GUI Elements
 def stopButton = Button {
 			text: "STOP"
@@ -152,7 +167,7 @@ def startButton = Button {
 		};
 def generation = Label {
 			text: bind "Generation:{matrix.generation}"
-			font: Font{
+			font: Font {
 				name: "Tahoma"
 				size: 16
 			}
@@ -163,7 +178,7 @@ matrix.birth(10, 10).birth(10, 9).birth(10, 11).birth(12, 10).next();
 
 Stage {
 	title: "Life Game"
-	resizable:false
+	resizable: false
 	scene: Scene {
 		width: (MATRIX_SIZE + 1) * 10
 		height: (MATRIX_SIZE + 1) * 10 + 30
