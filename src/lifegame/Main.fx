@@ -40,8 +40,10 @@ class Matrix {
 
 	public-read var rows: Row[] = bind for (i in [0..<MATRIX_SIZE]) Row {};
 	public-read var generation = 0;
+	public-read var stack = false;
 	// next state. Changes are recorded.
-	var updates: Update[];
+	var updates: Update[] = [];
+
 
 	function get(x: Integer, y: Integer): Boolean {
 		return rows[x].columns[y];
@@ -96,12 +98,17 @@ class Matrix {
 
 	// Go to next state.
 	function next(): Void {
-		for (u in updates) {
-			rows[u.x].columns[u.y] = u.v;
-		//println("({u.x},{u.y})={u.v}");
+		if (updates.size() == 0) {
+			stack = true;
+		} else {
+			for (u in updates) {
+				rows[u.x].columns[u.y] = u.v;
+				//println("({u.x},{u.y})={u.v}");
+			}
+			stack = false;
+			updates = [];
+			generation++;
 		}
-		updates = [];
-		generation++;
 	}
 
 }
@@ -115,7 +122,7 @@ def circles = Group {
 					Circle {
 						translateX: (i + 1) * 10
 						translateY: (j + 1) * 10
-						radius: bind if(matrix.rows[i].columns[j]) rd else 5
+						radius: bind if (matrix.rows[i].columns[j]) rd else 5
 						fill: bind if (matrix.rows[i].columns[j]) Color.RED else Color.WHITE
 
 						onMouseClicked: function(e: MouseEvent): Void {
@@ -125,20 +132,24 @@ def circles = Group {
 				}
 			}
 		}
-def clock = Timeline {
+
+def clock: Timeline = Timeline {
 			repeatCount: Timeline.INDEFINITE
 			keyFrames: [
 				KeyFrame {
 					time: 1s
 					action: function() {
 						matrix.gen();
+						if(matrix.stack) clock.pause();
 					}
 				}
 			]
 		};
-// heatbeat animation
 
-Timeline {
+/**
+ * Heatbeat Animation
+ */
+def heatbeat: Timeline = Timeline {
 	repeatCount: Timeline.INDEFINITE
 	rate: 0.25
 	keyFrames: [
@@ -148,7 +159,9 @@ Timeline {
 		at (0.75s) {rd => 2}
 		at (1.0s) {rd => 5},
 	]
-}.play();
+};
+
+heatbeat.play();
 
 // GUI Elements
 def stopButton = Button {
