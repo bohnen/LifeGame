@@ -140,7 +140,7 @@ def clock: Timeline = Timeline {
 					time: 1s
 					action: function() {
 						matrix.gen();
-						if(matrix.stack) clock.pause();
+						if(matrix.stack) running = false;
 					}
 				}
 			]
@@ -161,20 +161,30 @@ def heatbeat: Timeline = Timeline {
 	]
 };
 
-heatbeat.play();
+var running = false on replace {
+	if(running){
+		clock.play();
+		heatbeat.play();
+	}else{
+		clock.pause();
+		heatbeat.stop();
+	}
+};
 
 // GUI Elements
 def stopButton = Button {
 			text: "STOP"
 			onMouseClicked: function(e: MouseEvent): Void {
-				clock.pause();
+				//clock.pause();
+				running = false;
 
 			}
 		};
 def startButton = Button {
 			text: "START"
 			onMouseClicked: function(e: MouseEvent): Void {
-				clock.play();
+				//clock.play();
+				running = true;
 
 			}
 		};
